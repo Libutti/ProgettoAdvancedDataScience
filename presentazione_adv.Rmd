@@ -1,0 +1,821 @@
+---
+title: "Analisi di un successo: Il caso Golden State Warriors"
+author: Emanuele Libutti, matr.163688
+output:
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, fig.align = "center")
+```
+
+```{r, include=FALSE}
+
+#Prima parte di setup, vengono di seguito caricate le librerie utilizzate durante l'analisi e creati i dataset contenenti le statistiche dei team e dei giocatori che hanno giocato in NBA dal 2008 al 2023
+
+#Librerie utilizzate
+
+library(dplyr)
+library(ggplot2)
+library(gghighlight)
+library(ggpubr)
+library(ggrepel)
+
+#Lettura dataset contenenti statistiche sui team dal 2008 al 2023
+
+team22_23 <- read.csv("team22_23.csv")
+team21_22 <- read.csv("team21_22.csv")
+team20_21 <- read.csv("team20_21.csv")
+team19_20 <- read.csv("team19_20.csv")
+team18_19 <- read.csv("team18_19.csv")
+team17_18 <- read.csv("team17_18.csv")
+team16_17 <- read.csv("team16_17.csv")
+team15_16 <- read.csv("team15_16.csv")
+team14_15 <- read.csv("team14_15.csv")
+team13_14 <- read.csv("team13_14.csv")
+team12_13 <- read.csv("team12_13.csv")
+team11_12 <- read.csv("team11_12.csv")
+team10_11 <- read.csv("team10_11.csv")
+team09_10 <- read.csv("team09_10.csv")
+team08_09 <- read.csv("team08_09.csv")
+
+#Aggiunta variabile season ai team dataset
+
+team08_09 =
+  team08_09 %>% 
+  mutate(season = "08/09")
+team09_10 =
+  team09_10 %>% 
+  mutate(season = "09/10")
+team10_11 =
+  team10_11 %>% 
+  mutate(season = "10/11")
+team11_12 =
+  team11_12 %>% 
+  mutate(season = "11/12")
+team12_13 =
+  team12_13 %>% 
+  mutate(season = "12/13")
+team13_14 =
+  team13_14 %>% 
+  mutate(season = "13/14")
+team14_15 =
+  team14_15 %>% 
+  mutate(season = "14/15")
+team15_16 =
+  team15_16 %>% 
+  mutate(season = "15/16")
+team16_17 =
+  team16_17 %>% 
+  mutate(season = "16/17")
+team17_18 =
+  team17_18 %>% 
+  mutate(season = "17/18")
+team18_19 =
+  team18_19 %>% 
+  mutate(season = "18/19")
+team19_20 =
+  team19_20 %>% 
+  mutate(season = "19/20")
+team20_21 =
+  team20_21 %>% 
+  mutate(season = "20/21")
+team21_22 =
+  team21_22 %>% 
+  mutate(season = "21/22")
+team22_23 =
+  team22_23 %>% 
+  mutate(season = "22/23")
+
+#Creazione del dataset team_season contenente tutte le statistiche dei team dal 2008 al 2023
+
+team_seasons <- bind_rows(team08_09, team09_10)
+team_seasons <- bind_rows(team_seasons, team10_11)
+team_seasons <- bind_rows(team_seasons, team11_12)
+team_seasons <- bind_rows(team_seasons, team12_13)
+team_seasons <- bind_rows(team_seasons, team13_14)
+team_seasons <- bind_rows(team_seasons, team14_15)
+team_seasons <- bind_rows(team_seasons, team15_16)
+team_seasons <- bind_rows(team_seasons, team16_17)
+team_seasons <- bind_rows(team_seasons, team17_18)
+team_seasons <- bind_rows(team_seasons, team18_19)
+team_seasons <- bind_rows(team_seasons, team19_20)
+team_seasons <- bind_rows(team_seasons, team20_21)
+team_seasons <- bind_rows(team_seasons, team21_22)
+team_seasons <- bind_rows(team_seasons, team22_23)
+
+#Lettura dataset contenenti le statistiche avanzate dei team dal 2008 al 2023
+
+adv_team08_09 <- read.csv("adv_team08_09.csv")
+adv_team09_10 <- read.csv("adv_team09_10.csv")
+adv_team10_11 <- read.csv("adv_team10_11.csv")
+adv_team11_12 <- read.csv("adv_team11_12.csv")
+adv_team12_13 <- read.csv("adv_team12_13.csv")
+adv_team13_14 <- read.csv("adv_team13_14.csv")
+adv_team14_15 <- read.csv("adv_team14_15.csv")
+adv_team15_16 <- read.csv("adv_team15_16.csv")
+adv_team16_17 <- read.csv("adv_team16_17.csv")
+adv_team17_18 <- read.csv("adv_team17_18.csv")
+adv_team18_19 <- read.csv("adv_team18_19.csv")
+adv_team19_20 <- read.csv("adv_team19_20.csv")
+adv_team20_21 <- read.csv("adv_team20_21.csv")
+adv_team21_22 <- read.csv("adv_team21_22.csv")
+adv_team22_23 <- read.csv("adv_team22_23.csv")
+
+#Aggiunta variabile season ai dataset di statistiche avanzate dei team
+
+adv_team08_09 =
+  adv_team08_09 %>% 
+  mutate(season = "08/09")
+adv_team09_10 =
+  adv_team09_10 %>% 
+  mutate(season = "09/10")
+adv_team10_11 =
+  adv_team10_11 %>% 
+  mutate(season = "10/11")
+adv_team11_12 =
+  adv_team11_12 %>% 
+  mutate(season = "11/12")
+adv_team12_13 =
+  adv_team12_13 %>% 
+  mutate(season = "12/13")
+adv_team13_14 =
+  adv_team13_14 %>% 
+  mutate(season = "13/14")
+adv_team14_15 =
+  adv_team14_15 %>% 
+  mutate(season = "14/15")
+adv_team15_16 =
+  adv_team15_16 %>% 
+  mutate(season = "15/16")
+adv_team16_17 =
+  adv_team16_17 %>% 
+  mutate(season = "16/17")
+adv_team17_18 =
+  adv_team17_18 %>% 
+  mutate(season = "17/18")
+adv_team18_19 =
+  adv_team18_19 %>% 
+  mutate(season = "18/19")
+adv_team19_20 =
+  adv_team19_20 %>% 
+  mutate(season = "19/20")
+adv_team20_21 =
+  adv_team20_21 %>% 
+  mutate(season = "20/21")
+adv_team21_22 =
+  adv_team21_22 %>% 
+  mutate(season = "21/22")
+adv_team22_23 =
+  adv_team22_23 %>% 
+  mutate(season = "22/23")
+
+#Creazione del dataset adv_team_season contenente tutte le statistiche dei team dal 2008 al 2023
+
+adv_team_seasons <- bind_rows(adv_team08_09, adv_team09_10)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team10_11)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team11_12)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team12_13)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team13_14)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team14_15)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team15_16)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team16_17)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team17_18)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team18_19)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team19_20)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team20_21)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team21_22)
+adv_team_seasons <- bind_rows(adv_team_seasons, adv_team22_23)
+
+#Lettura dataset contenenti le statistiche dei giocatori dal 2014 al 2023
+
+player18_19 <- read.csv("player18_19.csv")
+player17_18 <- read.csv("player17_18.csv")
+player16_17 <- read.csv("player16_17.csv")
+player15_16 <- read.csv("player15_16.csv")
+player14_15 <- read.csv("player14_15.csv")
+player22_23 <- read.csv("player2223.csv")
+player21_22 <- read.csv("player21_22.csv")
+player20_21 <- read.csv("player20_21.csv")
+player19_20 <- read.csv("player19_20.csv")
+
+#Eliminazione duplicati. Le statistiche dei giocatori che cambiano squadra durante la stagione vengono riportate più volte all'interno dei dataset
+
+player22_23 <- player22_23 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player21_22 <- player21_22 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player20_21 <- player20_21 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player19_20 <- player19_20 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player18_19 <- player18_19 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player17_18 <- player17_18 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player16_17 <- player16_17 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player15_16 <- player15_16 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+player14_15 <- player14_15 %>% group_by(Rk) %>% filter(!duplicated(Rk))
+
+#Aggiunta variabile season ai dataset di statistiche dei giocatori
+
+player14_15 =
+  player14_15 %>% 
+  mutate(season = "14/15")
+player15_16 =
+  player15_16 %>% 
+  mutate(season = "15/16")
+player16_17 =
+  player16_17 %>% 
+  mutate(season = "16/17")
+player17_18 =
+  player17_18 %>% 
+  mutate(season = "17/18")
+player18_19 =
+  player18_19 %>% 
+  mutate(season = "18/19")
+player19_20 =
+  player19_20 %>% 
+  mutate(season = "19/20")
+player20_21 =
+  player20_21 %>% 
+  mutate(season = "20/21")
+player21_22 =
+  player21_22 %>% 
+  mutate(season = "21/22")
+player22_23 =
+  player22_23 %>% 
+  mutate(season = "22/23")
+
+#Creazione del dataset player_season contenente tutte le statistiche dei giocatori dal 2014 al 2023
+
+player_seasons <- bind_rows(player14_15, player15_16)
+player_seasons <- bind_rows(player_seasons, player16_17)
+player_seasons <- bind_rows(player_seasons, player17_18)
+player_seasons <- bind_rows(player_seasons, player18_19)
+player_seasons <- bind_rows(player_seasons, player19_20)
+player_seasons <- bind_rows(player_seasons, player20_21)
+player_seasons <- bind_rows(player_seasons, player21_22)
+player_seasons <- bind_rows(player_seasons, player22_23)
+
+#Lettura dataset contenenti le statistiche dei team qualificati ai playoff dal 2014 al 2022
+
+playoff19_20 <- read.csv("playoff19_20.csv")
+playoff20_21 <- read.csv("playoff20_21.csv")
+playoff21_22 <- read.csv("playoff21_22.csv")
+playoff18_19 <- read.csv("playoff18_19.csv")
+playoff17_18 <- read.csv("playoff17_18.csv")
+playoff16_17 <- read.csv("playoff16_17.csv")
+playoff15_16 <- read.csv("playoff15_16.csv")
+playoff14_15 <- read.csv("playoff14_15.csv")
+
+#Aggiunta variabile season ai dataset di statistiche dei playoff
+
+playoff14_15 =
+  playoff14_15 %>% 
+  mutate(season = "14/15")
+playoff15_16 =
+  playoff15_16 %>% 
+  mutate(season = "15/16")
+playoff16_17 =
+  playoff16_17 %>% 
+  mutate(season = "16/17")
+playoff17_18 =
+  playoff17_18 %>% 
+  mutate(season = "17/18")
+playoff18_19 =
+  playoff18_19 %>% 
+  mutate(season = "18/19")
+playoff19_20 =
+  playoff19_20 %>% 
+  mutate(season = "19/20")
+playoff20_21 =
+  playoff20_21 %>% 
+  mutate(season = "20/21")
+playoff21_22 =
+  playoff21_22 %>% 
+  mutate(season = "21/22")
+
+#Creazione del dataset playoff_season contenente tutte le statistiche dei team qualificati ai playoff dal 2014 al 2019
+
+playoff_seasons <- bind_rows(playoff14_15, playoff15_16)
+playoff_seasons <- bind_rows(playoff_seasons, playoff16_17)
+playoff_seasons <- bind_rows(playoff_seasons, playoff17_18)
+playoff_seasons <- bind_rows(playoff_seasons, playoff18_19)
+playoff_seasons <- bind_rows(playoff_seasons, playoff19_20)
+playoff_seasons <- bind_rows(playoff_seasons, playoff20_21)
+playoff_seasons <- bind_rows(playoff_seasons, playoff21_22)
+```
+
+## INTRODUZIONE
+
+La squadra “Golden State Warriors” di San Francisco è una delle trenta compagini di pallacanestro che militano nel campionato professionistico  statunitense e canadese National Basket Association (NBA).
+
+Il progetto tecnico e organizzativo proposto nell’ultimo decennio dai Warriors è sicuramente uno dei più interessanti e vincenti nel panorama sportivo mondiale. I numerosi record raggiunti ,ad oggi ancora imbattuti, e la conquista, in otto anni, di ben quattro titoli NBA   ne costituiscono la chiara testimonianza.
+
+Tutto ebbe inizio quando Steve Kerr, esordiente nelle vesti di allenatore, nel 2014 prese in mano la guida tecnica della franchigia riuscendo nella stessa stagione  a vincere il titolo NBA.
+
+I Warriors vinsero ancora il titolo nella stagione 2016/2017 e nella successiva 2017/2018. Dopo una finale persa nel 2018/2019 e due stagioni con risultati non brillantissimi,  a causa degli infortuni subiti dai giocatori più importanti, il team guidato da Kerr e’ riuscito di nuovo a vincere il titolo della stagione 2021/2022.
+
+In maniera unanime tecnici, giornalisti e commentatori hanno sottolineato che l’organizzazione messa in campo dalla franchigia di San Francisco abbia contribuito in maniera determinante a rivoluzionare il gioco e le strategie delle altre compagini NBA ed anche di quelle del basket a livello planetario.  A tutte le latitudini le squadre cominciano a emulare i Warriors nelle caratteristiche più rilevanti: velocità, intensità e fiducia estrema nel tiro, nella fase di attacco, sacrificio collettivo e cambi rapidi nelle marcature in difesa.
+
+***
+
+Attraverso l’analisi dei dati e delle relative statistiche cercherò di individuare:
+
+- Gli aspetti tecnici che hanno contribuito maggiormente alle vittorie dei Warriors;
+
+- Quali siano i giocatori che hanno dato un maggior apporto alle performance della squadra;
+
+- In che modo le altre compagini siano state influenzate dal gioco della squadra di San Francisco.
+
+Per la creazione dei dataset contenenti le statistiche dei giocatori e dei team sono stati utilizzati quelli riportati dal sito [Basketball Reference](https://www.basketball-reference.com/)
+
+
+## PUNTI, ASSIST E RIMBALZI
+
+Le tre statistiche maggiormente utilizzate da commentatori, tecnici ed esperti per una immediata valutazione del rendimento dei vari team e giocatori durante le stagioni sono quelle riferite a:
+
+- Punti medi a partita;
+- Rimbalzi medi a partita;
+- Assist medi a partita.
+
+***
+
+Per una prima valutazione dell’andamento del rendimento dei Warriors  sono stati confrontati, per ciascuna delle tre sopra evidenziate statistiche,  i dati  della compagine di San Francisco con quelli relativi alla media della intera lega per il periodo 2008 – 2023.
+
+```{r, echo = FALSE}
+team_punti = 
+  team_seasons %>% 
+  ggplot(aes(x = season, y = PTS, group = Team, color = Team)) +
+  geom_line() +
+  gghighlight(Team %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) +
+  theme(panel.grid.major = element_blank(), legend.position = "none")
+
+team_assist = 
+  team_seasons %>% 
+  ggplot(aes(x = season, y = AST, group = Team, color = Team)) +
+  geom_line() +
+  gghighlight(Team %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) +
+  theme(panel.grid.major = element_blank(), legend.position = "none")
+
+team_rimbalzi = 
+  team_seasons %>% 
+  ggplot(aes(x = season, y = TRB, group = Team, color = Team)) +
+  geom_line() +
+  gghighlight(Team %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) +
+  theme(panel.grid.major = element_blank(), legend.position = "none")
+
+
+ggarrange(team_punti,team_assist, team_rimbalzi,
+             nrow = 3, ncol = 1,
+          common.legend = TRUE, legend = "bottom")
+```
+
+***
+
+Come si evince dai grafici, per tutto il periodo preso in esame i Warrios registrano una media punti e assist  superiore alla media di lega, con un distacco che si evidenzia più ampio negli anni della vittoria  dei titoli (2015, 2017 e 2018). Per quanto riguarda i rimbalzi, invece, i risultati appaiono sempre vicini alla media di lega, anche lievemente inferiori fino alla stagione 2012 e, all’opposto, lievemente superiori negli anni successivi.
+
+I punti , gli assist e i rimbalzi medi a partita rappresentano sicuramente delle statistiche utili per una prima valutazione del rendimento di una squadra, ma  non forniscono una analisi nel dettaglio delle prestazioni  di un team. Inoltre danno pochissime indicazioni sulle performance difensive che sono  un fattore fondamentale se si vuole valutare la “capacita di successo” di un roster.
+
+
+## FOUR FACTORS OF BASKETBALL SUCCESS
+
+Abbiamo bisogno di un modello che ci permetta di analizzare al meglio le prestazioni di una sqaudra.
+
+Uno di quelli più utilizzati è il modello dei four factors of basketball success creato dallo statistico Dean Oliver nel 2007 e utilizzato per la valutazione delle perfomance di una squadra di basket.
+
+Esistono due versioni del modello:
+
+- Four factors offensivi;
+- Four factors difensivi.
+
+## FOUR FACTORS OFFENSIVI
+
+Le statistiche che fanno parte dei four facors offensivi sono:
+
+- **eFG%**, effective field goal percentage, percentuale aggiustata dei tiri dal campo effettuati. Nel calcolo viene dato un valore più elevato ai tiri da tre punti che a quelli da 2. 
+
+
+$$eFG\% = \frac{(FG+0.5 * 3P)}{FGA}$$
+
+- **TOV%**, percentuale delle palle perse ogni 100 possessi.
+
+
+$$TOV\% = \frac{100 * TOV}{(FGA + 0.44 * FTA + TOV)}$$
+
+
+- **ORB%**, percentuale dei rimbalzi offensivi.
+
+
+$$ORB\% = (\frac{ORB}{ORB + DRB})$$
+
+- **FTr**, rating dei tiri liberi.
+
+$$FTr = \frac{FT}{FGA}$$
+
+***
+
+```{r, echo = FALSE}
+eFG_seasons = 
+  adv_team_seasons %>% 
+  ggplot(aes(x = season, y = Offense.Four.Factors, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("eFG%") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+TOV_seasons = 
+  adv_team_seasons %>%
+  ggplot(aes(x = season, y = Offense.Four.Factors.1, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("TOV%") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+ORB_seasons = 
+  adv_team_seasons %>%
+  ggplot(aes(x = season, y = Offense.Four.Factors.2, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("ORB%") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+FT_FGA_seasons = 
+  adv_team_seasons %>%
+  ggplot(aes(x = season, y = Offense.Four.Factors.3, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("FT/FGA") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+ggarrange(eFG_seasons, TOV_seasons, ORB_seasons, FT_FGA_seasons,
+          ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+```
+
+Come si evince dal grafico, la franchigia dei Golden State Warriors negli anni ha registrato un'altissima percentuale di efficienza dal campo (eFG%). Le migliori performance si sono verificate negli anni che vanno dal 2014 al 2019, con rilevante distacco rispetto alla media di lega.
+
+Per quanto riguarda gli altri fattori: La TOV% è risultata in media con le altre squadre NBA, mentre i valori dell'ORB% e del FTr sono in larga parte al di sotto della media.
+
+
+## FOUR FACTORS DIFENSIVI
+
+I fuor factotors difensivi sono calcolati utilizzando i dati relativi agli opponent team della squadra oggetto di valutazione. I valori riferiti a eFG%, TOV% e Ftr difensivi verranno calcolati, pertanto, con la stessa formula statistica utilizzata per i corrispondenti fattori offensivi, utilizzando i relativi dati delle squadre avversarie.
+
+Per quanto riguarda il quarto fattore, ossia la percentuale di rimbalzi difensivi , la formula utilizzata per il calcolo è la seguente:
+
+$$DRB\% = (\frac{DRB}{ORB + DRB})$$
+
+Da quanto illustrato emerge, quindi, che più il valore dei primi tre fattori risulta basso, migliore sarà stata la performance difensiva della squadra in esame. Al contrario più alta sarà la percentuale di rimbazi difensivi , migliore risulterà la prestazione della squadra.
+
+***
+
+```{r, echo = FALSE}
+eFG_def_seasons = 
+  adv_team_seasons %>%
+  ggplot(aes(x = season, y = Defense.Four.Factors, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("eFG%") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+TOV_def_seasons = 
+  adv_team_seasons %>%
+  ggplot(aes(x = season, y = Defense.Four.Factors.1, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("TOV%") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+DRB_def_seasons =  
+  adv_team_seasons %>%
+  ggplot(aes(x = season, y = Defense.Four.Factors.2, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("DRB%") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+FT_FGA_def_seasons = 
+  adv_team_seasons %>%
+  ggplot(aes(x = season, y = Defense.Four.Factors.3, group = X.1, color = X.1)) +
+  geom_line() +
+  ylab("FT/FGA") +
+  gghighlight(X.1 %in% c("Golden State Warriors", "League Average"), use_direct_label = FALSE) + 
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank())
+
+
+ggarrange(eFG_def_seasons, TOV_def_seasons, DRB_def_seasons, FT_FGA_def_seasons,
+          ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+```
+
+Come si evince dal grafico, i Golden State Warriors hanno fatto registrare ottimi valori di eFG% difensiva , di gran lunga inferiori a quelli medi negli anni dal 2012 al 2019.
+
+Meno rilevanti , dal punto di vista delle performance , risultano le altre statistiche, con valori che sono vicini alla media di lega.
+
+
+## LE ARMI VINCENTI DEI GOLDEN STATE WARRIORS 
+
+Dopo aver analizzato i fuor factors offensivi e difensivi cercherò di individuare quali siano state le caratteristiche vincenti dell’organizzazione di gioco messa in campo dai Warriors.
+
+In primo luogo devono evidenziarsi le ottime prestazioni difensive della squadra. Infatti, il valore dell’effective field goal percentage (eFG%) difensivo, calcolato in base ai canestri subiti, è risultato,  negli anni 2015, 2017 e 2018 sensibilmente inferiore a quello della media degli opponent team, nel 2022, anno dell’ultimo successo nel campionato NBA, in linea con detta media.
+
+Indubbiamente la buona difesa è stata una delle armi vincenti dei Golden State Warriors.
+
+L’analisi dell’eFG% offensivo dei Warriors offre ulteriori ed importanti indicazioni su quali siano stati gli altri punti di forza del team allenato da Kerr. Occorre, innanzitutto, sottolineare che nel calcolo della eFG% offensiva, i tiri da tre punti hanno un peso maggiore rispetto a quelli da due.
+
+Per tutto il periodo che va dal 2014 al 2018 , nel quale i Golden State hanno vinto tre titoli e disputato una finale perdendola, i valori di effective field goal percentage fatti registrare dalla squadra sono considerevolmente superiori alla media ( es. 2015/2016 Warrior 0,563 media 0,502). Detto valore rimane superiore alla media, anche se con distacco ridimensionato, anche nell’anno 2022.
+
+***
+
+Questi dati testimoniano la grandissima efficienza al tiro della squadra di San Francisco e la differenza rispetto alle altre compagini può essere spiegata solo con un’alta propensione alla realizzazione dei tiri da tre punti, che rappresenta, sicuramente un fattore cardine nelle vittorie dei Golden State Warriors.
+
+Al fine di confermare la fondamentale importanza che il cosiddetto “gioco da tre” assume nell’organizzazione tattica dei Warriors e nei risultati ottenuti dalla squadra,  ho effettuato due ulteriori approfondimenti.
+ 
+
+Il primo pone in rilievo il confronto tra le percentuali di realizzazione di tiri da tre punti dei Warriors con quelle medie di lega nel periodo tra il 2014 e il 2023 sia nella regular season sia nei play off.
+
+***
+
+```{r, echo = FALSE}
+X3P_confronto_season = 
+  team_seasons %>% 
+  filter(Team %in% c("Golden State Warriors", "League Average"), season %in% c("14/15", "15/16", "16/17", "17/18", "18/19", "19/20", "20/21", "21/22")) %>%  
+  ggplot(aes(x = season, y = X3P., color = Team, fill = Team)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  ggtitle("Regular Season") +
+  theme(legend.position = "none")
+
+X3P_confronto_playoff = 
+  playoff_seasons %>% 
+  filter(Tm %in% c("Golden State Warriors", "League Average")) %>%  
+  ggplot(aes(x = season, y = X3P., color = Tm, fill = Tm)) +
+  geom_bar(stat = "identity",position = "dodge") +
+  ggtitle("Playoff") +
+  theme(legend.position = "none")
+
+ggarrange(X3P_confronto_season, X3P_confronto_playoff,
+          ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
+
+```
+
+***
+
+I dati riportati nel grafico dimostrano che, ad eccezione dei due anni in cui la squadra non ha disputato i play off, le percentuali realizzative risultano sensibilmente migliori di quelle medie della lega.
+
+Infine, ho realizzato uno scatterplot che mette in relazione l’offensive rating, ovvero la media dei punti realizzati ogni 100 possessi, con la percentuale di tiri da tre punti realizzati dalle franchigie nel periodo tra il 2014 e il 2023.
+
+***
+
+```{r, echo = FALSE}
+team_completo = 
+  rename(adv_team_seasons, "Team" = "X.1") %>%
+  inner_join(team_seasons, adv_team_seasons, by = c("Team", "season"))
+
+team_completo = transform(team_completo, X.10 = as.numeric(X.10))
+
+team_completo = 
+  team_completo %>%
+  filter(season %in% c("14/15", "15/16", "16/17", "17/18", "18/19", "19/20", "20/21", "21/22", "22/23")) %>% 
+  group_by(Team) %>%
+  summarise(across(c(X.10, X3P.), mean))
+
+graficoORTG_X3P. = 
+  team_completo %>%
+  ggplot(aes(x = X3P., y = X.10, color = Team)) +
+  geom_point(size = 3) +
+  ylab("ORtg") +
+  xlab("3P%") +
+  theme(panel.grid.major = element_blank()) +
+  gghighlight(Team %in%  c("Golden State Warriors", "League Average"), use_direct_label = FALSE)
+
+graficoORTG_X3P.
+```
+
+I Warriors hanno avuto un percentuale realizzativa da tre punti, nel periodo preso in esame, pari 0,381 contro lo 0,357 della media delle altre squadre  e un rating offensivo pari a 112,9 rispetto a 109,9.  Questi dati confermano che  l’altissima  efficienza offensiva dei Warriors sia legata all’alta percentuale realizzativa da tre punti.
+
+## ARTEFICI DEL SUCCESSO DEI GOLDEN STATE WARRIORS
+
+E’ evidente che nello sport in generale e nella pallacanestro in particolare qualsiasi strategia ritenuta vincente ed avanzata sarà destinata al fallimento se non si hanno a disposizione giocatori capaci di realizzarla. Nel caso dei Golden state Warrior questo giocatore si chiama Stephen Curry.
+
+Stephen Curry è da tutti considerato il miglior tiratore della storia della NBA. Ad oggi detiene il record di tiri da tre punti segnati in una stagione (402) ed è l’unico giocatore ad aver superato i 3000 tiri da tre punti realizzati.  La stella dei Warriors nella sua carriera è riuscita a segnare il 42.7% dei tentativi di tiri da 3 punti. Percentuale altissima se consideriamo che il secondo miglior tiratore della storia, Rey Allen, ne ha seganti il 40% e il terzo, James Harden, solo il 36.5%.
+
+Alcune statistiche confermano il fondamentale ruolo avuto da Curry nelle vittorie ottenute dalla sua squadra nell’ultimo decennio.
+
+***
+
+```{r, echo = FALSE}
+#Creazione dataset contenenti le statistiche totali dei giocatori dal 2014 al 2019, più aggiunta di una riga contenente i punti realizzati dai giocatori meno incisivi dei Golden State Warriors
+
+player_tot_22_23 <- read.csv("player_tot_22_23.csv")
+altri22_23 = data.frame(Player = "Altri", Tm = "GSW", PTS = 3671)
+player_tot_22_23 <- bind_rows(player_tot_22_23, altri22_23)
+
+player_tot_21_22 <- read.csv("player_tot_21_22.csv")
+altri21_22 = data.frame(Player = "Altri", Tm = "GSW", PTS = 3813)
+player_tot_21_22 <- bind_rows(player_tot_21_22, altri21_22)
+
+player_tot_20_21 <- read.csv("player_tot_20_21.csv")
+altri20_21 = data.frame(Player = "Altri", Tm = "GSW", PTS = 3796)
+player_tot_20_21 <- bind_rows(player_tot_20_21, altri20_21)
+
+player_tot_19_20 <- read.csv("player_tot_19_20.csv")
+altri19_20 = data.frame(Player = "Altri", Tm = "GSW", PTS = 5727)
+player_tot_19_20 <- bind_rows(player_tot_19_20, altri19_20)
+
+player_tot_18_19 <- read.csv("player_tot_18_19.csv")
+altri18_19 = data.frame(Player = "Altri", Tm = "GSW", PTS = 3187)
+player_tot_18_19 <- bind_rows(player_tot_18_19, altri18_19)
+
+player_tot_17_18 <- read.csv("player_tot_17_18.csv")
+altri17_18 = data.frame(Player = "Altri", Tm = "GSW", PTS = 3548)
+player_tot_17_18 <- bind_rows(player_tot_17_18, altri17_18)
+
+player_tot_16_17 <- read.csv("player_tot_16_17.csv")
+altri16_17 = data.frame(Player = "Altri", Tm = "GSW", PTS = 2857)
+player_tot_16_17 <- bind_rows(player_tot_16_17, altri16_17)
+
+player_tot_15_16 <- read.csv("player_tot_15_16.csv")
+altri15_16 = data.frame(Player = "Altri", Tm = "GSW", PTS = 3687)
+player_tot_15_16 <- bind_rows(player_tot_15_16, altri15_16)
+
+player_tot_14_15 <- read.csv("player_tot_14_15.csv")
+altri14_15 = data.frame(Player = "Altri", Tm = "GSW", PTS = 3923)
+player_tot_14_15 <- bind_rows(player_tot_14_15, altri14_15)
+
+player_tot <- bind_rows(player_tot_14_15, player_tot_15_16)
+player_tot <- bind_rows(player_tot, player_tot_16_17)
+player_tot <- bind_rows(player_tot, player_tot_17_18)
+player_tot <- bind_rows(player_tot, player_tot_18_19)
+player_tot <- bind_rows(player_tot, player_tot_19_20)
+player_tot <- bind_rows(player_tot, player_tot_20_21)
+player_tot <- bind_rows(player_tot, player_tot_21_22)
+player_tot <- bind_rows(player_tot, player_tot_22_23)
+
+player_tot = 
+  player_tot %>%
+  filter (Tm == "GSW") %>%
+  group_by(Player) %>%
+  summarise(PTS = sum(PTS))
+
+golden_punti_totali <- 9016 + 9421 + 9503 + 9304 + 9650 + 6912 + 8187 + 9102 + 9753
+
+player_tot2 <- player_tot %>% 
+  filter(Player %in% c("Stephen Curry", "Kevin Durant",
+                       "Klay Thompson", "Andre Iguodala", 
+                       "Draymond Green", "Jordan Poole", "Andrew Wiggins", "Altri")) %>%
+  mutate(csum = rev(cumsum(rev(PTS))), 
+         pos = PTS/2 + lead(csum, 1),
+         pos = if_else(is.na(pos), PTS/2, pos),
+         percentage = PTS/golden_punti_totali)
+
+grafico_tot = 
+  player_tot %>%
+  filter(Player %in% c("Stephen Curry", "Kevin Durant",
+                                    "Klay Thompson", "Andre Iguodala", 
+                                    "Draymond Green", "Jordan Poole", "Andrew Wiggins", "Altri")) %>%
+  ggplot(aes(x = " ", y = PTS, color = Player, fill = Player)) +
+  geom_col(color = "black") +
+  geom_label_repel(data = player_tot2, aes(y = pos, label = glue::glue("{PTS} 
+                                   ({scales::percent(percentage)})")),
+           color = "black",
+           size = 3.5, nudge_x = 0.7, show.legend = FALSE) +
+  coord_polar(theta = "y") +
+  theme_void()
+grafico_tot
+```
+
+I Golden State nel periodo che va dal 2014 al 2023 hanno segnato complessivamente 80848 punti Curry ne ha segnati da solo 14898 pari al 18,43% del totale. Tali dati, di per se già rilevanti, acquistano ancora maggior significato se si consideri che la guardia dei Warriors non ha disputato il campionato 2019/2020 per infortunio
+
+***
+
+A conferma della particolare abilità nella realizzazione da tre punti, ho analizzato la media dei tiri da tre punti a partita realizzati da Curry nel periodo dal 2014 al 2023 per singola stagione.
+
+
+```{r, echo = FALSE}
+curry_3p_14_15 = 
+  player14_15 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 14/15") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+curry_3p_15_16 = 
+  player15_16 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 15/16") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+curry_3p_16_17 = 
+  player16_17 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 16/17") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+curry_3p_17_18 = 
+  player17_18 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 17/18") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+curry_3p_18_19 = 
+  player18_19 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 18/19") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+curry_3p_20_21 = 
+  player20_21 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 20/21") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+curry_3p_21_22 = 
+  player21_22 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 21/22") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+curry_3p_22_23 = 
+  player22_23 %>%
+  ggplot(aes(x = Player, y = X3P, color = Player, fill = Player)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Season 22/23") + 
+  ylab("3P") +
+  xlab("Player") +
+  theme(panel.grid.major = element_blank(), legend.position = "none", axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
+  gghighlight(Player == "Stephen Curry", use_direct_label = FALSE)
+
+
+ggarrange(curry_3p_14_15, curry_3p_15_16, curry_3p_16_17, curry_3p_17_18, curry_3p_18_19, curry_3p_20_21, curry_3p_21_22, curry_3p_22_23,
+          ncol = 2, nrow = 4, common.legend = TRUE, legend = "bottom")
+
+```
+
+Si evidenzia che in tutte le stagioni Curry è risultato il migliore rispetto a tutti gli altri giocatori del campionato NBA, con medie che hanno raggiunto il dato di 5,3 triple realizzate a partita, nella stagione 2020/2021.
+
+## COME I WARRIORS HANNO INFLUENZATO LE ALTRE SQUADRE DI NBA
+
+Gli ottimi risultati ottenuti dalla squadra dei Golden State Warriors hanno profondamente influenzato l’organizzazione del gioco e la scelta degli atleti da parte delle altre società militanti nel campionato NBA.
+
+Nel corso del tempo, si è cominciato a comprendere, dall’analisi dei risultati, dei dati e delle statistiche l’efficacia dell’organizzazione di gioco dei Warriors. Gli altri team da un lato hanno  studiato le possibili contromisure difensive e dall’altro hanno cominciato a variare le proprie strategie di gioco cercando di valorizzare l’efficienza realizzativa dai tre punti.
+
+
+***
+
+La  crescente attenzione di tutte le compagini NBA nei confronti del “gioco da tre”  è ben evidente se si analizza la media dei tiri da tre realizzati dai team durante una partita nel periodo tra il 2008 e il 2023
+
+```{r, echo = FALSE}
+grafico3panni = 
+  team_seasons %>%
+  ggplot(aes(x = season, y = X3P, group = Team, color = Team)) +
+  geom_line() +
+  theme(panel.grid.major = element_blank()) +
+  gghighlight(Team == "League Average", use_direct_label = FALSE)
+
+
+grafico3panni
+```
+
+***
+
+Come di evince dal grafico si è passati da una media di poco superiore ai 6 tiri realizzati nel 2008 a circa il doppio nel 2023. Anche sulla base di questi dati unanimemente i tecnici,i  giornalisti e i commentatori hanno sottolineato che l’organizzazione messa in campo dalla franchigia di San Francisco abbia contribuito in maniera determinante a rivoluzionare il gioco e le strategie delle altre compagini NBA .
+
+Lo stesso ex Presidente degli Stati Uniti  Barack Obama nel ricevere la Squadra dei Golden State Warriors alla Casa Bianca dichiarò  “sono fortissimi, sembra che stiano cambiando il modo stesso di giocare.Io non gioco da tempo a pallacanestro, ma ne so abbastanza e questa è davvero una delle migliori squadre che abbia mai visto”.
